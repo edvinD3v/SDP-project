@@ -1,13 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import MainScreen from './src/screens/mainScreen';
 import GameScreen from './src/screens/gameScreen';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Audio } from 'expo-av';
 
 export type StackParams = {
   MainScreen: undefined;

@@ -1,4 +1,4 @@
-import { ImageBackground, StyleSheet, Text, View } from 'react-native';
+import { ImageBackground, StyleSheet, Text } from 'react-native';
 import React, { useEffect } from 'react';
 import CountingGame from '../components/games/countingGame';
 import ComparisonGame from '../components/games/comparisonGame';
@@ -11,16 +11,29 @@ import AnswerMenu from '../components/gameComponents/answerMenu';
 import useRandomMathOperation from '../hooks/useRandomMathOperation';
 import { StackScreenProps } from '@react-navigation/stack';
 import { StackParams } from '../../App';
+import { useAppSelector } from '../hooks/useAppSelector';
 
 type GameScreenProps = StackScreenProps<StackParams, 'GameScreen'>;
 
 export default function GameScreen( { route }: GameScreenProps ) {
+
+  const { language, sound, difficulty } = useAppSelector(state => state.settings);
+
+  let finalNumber: number;
+  let possibleAnswers;
+
   const { game } = route.params;
 
   const { x, y, generateTask } = useRandomMathOperation();
 
   let GameComponent;
   let operator: string = '';
+
+  const getRandomOperator = (): string => {
+    const operators = ['+', '-', '*', '/'];
+    const randomIndex = Math.floor(Math.random() * operators.length);
+    return operators[randomIndex];
+  };
 
   switch (game) {
     case 'counting':
@@ -49,18 +62,34 @@ export default function GameScreen( { route }: GameScreenProps ) {
       break;
     case 'quiz':
       GameComponent = QuizGame;
-      operator = 'q';
+      operator = getRandomOperator();
       break;
     default:
       GameComponent = () => <Text>Unknown Game</Text>;
   }
 
+  if((operator === '+' || operator === '-') && difficulty === 'easy') {
+    finalNumber = 5;
+  } else if((operator === '+' || operator === '-') && difficulty === 'medium') {
+    finalNumber = 16;
+  } else if((operator === '+' || operator === '-') && difficulty === 'hard') {
+    finalNumber = 36;
+  } else if((operator === '*' || operator === '/') && difficulty === 'easy') {
+    finalNumber = 3;
+  } else if((operator === '*' || operator === '/') && difficulty === 'medium') {
+    finalNumber = 6;
+  } else if((operator === '*' || operator === '/') && difficulty === 'hard') {
+    finalNumber = 9;
+  } else if((operator === 'c' || operator === 'com')) {
+    finalNumber = 18;
+  }
+
   useEffect(() => {
-    generateTask(operator);
-  }, []);
+    generateTask(operator, finalNumber);
+  }, [operator]);
 
   let z;
-  let correctAnswer: string | number;
+  let correctAnswer: string | number = 0;
 
   switch (operator) {
     case 'c':
@@ -132,8 +161,6 @@ export default function GameScreen( { route }: GameScreenProps ) {
     return result;
   }
 
-  let possibleAnswers;
-
   if(operator === 'com') {
     possibleAnswers = ['<', '=', '>'];
   } else {
@@ -142,15 +169,15 @@ export default function GameScreen( { route }: GameScreenProps ) {
   
   const handleAnswerSelection = (selectedAnswer: any) => {
     if (selectedAnswer === correctAnswer) {
-      generateTask(operator);
+      generateTask(operator, finalNumber);
     }
   };
 
   return (
     <ImageBackground source={require('../../assets/backgrounds/bg9.jpg')} style={styles.backgroundImage}>
-        <GameComponent x = {x} y = {y} />
+        <GameComponent x = {x} y = {y} operator={operator} />
 
-        <AnswerMenu ans1 = {possibleAnswers[0]} ans2 = {possibleAnswers[1]} ans3 = {possibleAnswers[2]} onAnswerSelect={handleAnswerSelection}></AnswerMenu>
+        <AnswerMenu ans1 = {possibleAnswers[0]} ans2 = {possibleAnswers[1]} ans3 = {possibleAnswers[2]} correctAnswer={correctAnswer} onAnswerSelect={handleAnswerSelection}></AnswerMenu>
     </ImageBackground>
   );
 }

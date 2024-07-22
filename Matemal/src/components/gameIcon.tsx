@@ -1,17 +1,34 @@
-import { StatusBar } from 'expo-status-bar';
-import { ImageBackground, StyleSheet, Text, View } from 'react-native';
-import * as ScreenOrientation from 'expo-screen-orientation';
-import React, { useEffect } from 'react';
+import React from 'react';
+import { View, Image, Text, StyleSheet } from 'react-native';
 
 interface GameIconProps {
   title: string;
 }
 
-export default function Gameicon(props: GameIconProps) {
+const images: { [key: string]: any } = {
+  counting: require('../../assets/gameIcons/counting.jpg'),
+  brojanje: require('../../assets/gameIcons/counting.jpg'),
+  compare: require('../../assets/gameIcons/compare.jpg'),
+  poređenje: require('../../assets/gameIcons/compare.jpg'),
+  adding: require('../../assets/gameIcons/adding.jpg'),
+  sabiranje: require('../../assets/gameIcons/adding.jpg'),
+  subtracting: require('../../assets/gameIcons/subtracting.jpg'),
+  oduzimanje: require('../../assets/gameIcons/subtracting.jpg'),
+  multiply: require('../../assets/gameIcons/multiply.jpg'),
+  množenje: require('../../assets/gameIcons/multiply.jpg'),
+  divide: require('../../assets/gameIcons/divide.jpg'),
+  dijeljenje: require('../../assets/gameIcons/divide.jpg'),
+  quiz: require('../../assets/gameIcons/quiz.jpg'),
+  kviz: require('../../assets/gameIcons/quiz.jpg'),
+};
+
+export default function GameIcon(props: GameIconProps) {
+  const imageSource = images[props.title.toLowerCase()];
+
   return (
     <View style={[styles.container, styles.shadowProp]}>
-        <Text>Image</Text>
-        <Text style={styles.title}>{props.title}</Text>
+      {imageSource && <Image style={styles.image} source={imageSource} />}
+      <Text style={styles.title}>{props.title}</Text>
     </View>
   );
 }
@@ -22,9 +39,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 20,
-    width: 80,
-    height: 90,
+    width: 90,
+    height: 110,
     borderRadius: 15,
+    borderColor: 'white',
+    borderWidth: 2
   },
   shadowProp: {
     shadowColor: 'black',
@@ -43,5 +62,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '700',
     textAlign: 'center',
+  },
+  image: {
+    resizeMode: 'center',
+    width: '85%',
+    height: '85%',
+    marginTop: -15,
+    borderRadius: 15,
   }
 });

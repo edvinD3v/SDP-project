@@ -3,6 +3,11 @@ type Language = 'en' | 'bh';
 interface Translations {
   settings: string;
   language: string;
+  difficulty: string;
+  easy: string;
+  medium: string;
+  hard: string;
+  music: string;
   sound: string;
   save: string;
   counting: string;
@@ -19,7 +24,12 @@ const translations: Record<Language, Translations> = {
   en: {
     settings: 'Settings',
     language: 'Language: ',
-    sound: 'Sound: ',
+    difficulty: 'Difficulty: ',
+    easy: 'Easy',
+    medium: 'Medium',
+    hard: 'Hard',
+    music: 'Music: ',
+    sound: 'Sound FX: ',
     save: 'Save',
     counting: 'Counting',
     compare: 'Compare',
@@ -33,6 +43,11 @@ const translations: Record<Language, Translations> = {
   bh: {
     settings: 'Postavke',
     language: 'Jezik: ',
+    difficulty: 'Težina: ',
+    easy: 'Lako',
+    medium: 'Srednje Teško',
+    hard: 'Teško',
+    music: 'Muzika: ',
     sound: 'Zvuk:',
     save: 'Sačuvaj',
     counting: 'Brojanje',

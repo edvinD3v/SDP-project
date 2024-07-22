@@ -1,7 +1,8 @@
-import { Dimensions, StyleSheet, Text, View, Image } from 'react-native';
-import React, { useEffect } from 'react';
+import { Dimensions, StyleSheet, FlatList, View, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import Symbol from '../gameComponents/symbol';
 import QBox from '../gameComponents/qBox';
+import useRandomIcon from '../../hooks/useRandomIcon';
 
 interface Props {
   x: number;
@@ -9,12 +10,33 @@ interface Props {
 }
 
 export default function DivideGame({ x, y }: Props) {
-    
+
+  const [numColumns, setColumnNo] = useState(x);
+  const randomIcon = useRandomIcon(x, y);
+
+  useEffect(() => {
+    setColumnNo(x/y);
+  }, [x, y]);
+
+  function createArray(number: any) {
+    let newArr = [];
+    for (let i = 1; i <= number; i++) {
+        newArr.push(i);
+    }
+    return newArr;
+  }
+
+  let data = createArray(x);
+    	
+  const renderItem = ({item}: {item: any}) => {
+    return <Image style={[styles.images]} source={randomIcon}/>
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.task}>
         <Symbol symbol={x} size={70} color='white'></Symbol>
-        <Symbol symbol='÷' size={70} color='white'></Symbol>
+        <Symbol symbol=':' size={70} color='white'></Symbol>
         <Symbol symbol={y} size={70} color='white'></Symbol>
         <Symbol symbol='=' size={70} color='white'></Symbol>
 
@@ -25,7 +47,12 @@ export default function DivideGame({ x, y }: Props) {
       
       <View style={styles.itemBox}>
         <View style={styles.box}>
-
+          <FlatList
+              data={data}
+              renderItem={renderItem}
+              numColumns={numColumns}
+              key={numColumns}>
+          </FlatList>
         </View>
 
       </View>
@@ -61,5 +88,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#07291b',
     backgroundColor: '#125539',
-  }
+  },
+  images: {
+    flex: 1,
+    objectFit: 'contain',
+    aspectRatio: 1,
+  },
 });

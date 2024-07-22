@@ -1,39 +1,123 @@
-import { ImageBackground, StyleSheet, Text, View, Pressable, Modal, Switch, BackHandler } from 'react-native';
+import { ImageBackground, StyleSheet, Text, View, Pressable, Modal, Switch } from 'react-native';
 import Gameicon from '../components/gameIcon';
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Dropdown } from 'react-native-element-dropdown';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../hooks/useAppSelector';
-import { changeLanguage, changeSound } from '../redux/settingsSlice';
+import { changeDifficulty, changeLanguage, changeMusic, changeSound } from '../redux/settingsSlice';
 import { translations, Language } from '../data/translations';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackParams } from '../../App';
+import { Audio } from 'expo-av';
+import { useFocusEffect } from '@react-navigation/native';
 
 type MainScreenProps = NativeStackScreenProps<StackParams, "MainScreen">
 
 export default function MainScreen({ navigation }: MainScreenProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
-
   const dispatch = useDispatch();
-  const { language, sound } = useAppSelector(state => state.settings);
+  const { language, sound, music, difficulty } = useAppSelector(state => state.settings);
+  const [languageValue, setLanguage] = useState(language);
+  const [difficultyValue, setDifficulty] = useState(difficulty);
+  
+  const musicStateRef = useRef<Audio.Sound | null>(null); // Using useRef to keep track of the sound state
 
-  const [value, setValue] = useState(language);
+  const [soundState, setSound] = useState <any>();
 
-  const toggleSwitch = () => {
-    dispatch(changeSound({ newSound: !sound }));
+  useEffect(() => {
+    return () => {
+      // Ensure sound is stopped and unloaded when component unmounts
+      if (musicStateRef.current) {
+        musicStateRef.current.stopAsync().then(() => {
+          musicStateRef.current?.unloadAsync();
+          musicStateRef.current = null; // Clear the reference
+        });
+      }
+    };
+  }, []);
+
+  const playBackgroundMusic = async () => {
+    try {
+      const backgroundMusic = new Audio.Sound();
+      await backgroundMusic.loadAsync(require('../../assets/sfx/bgMusic.mp3'), { isLooping: true });
+      await backgroundMusic.playAsync();
+      musicStateRef.current = backgroundMusic; // Store the reference
+    } catch (error) {
+      console.error('Failed to load background music', error);
+    }
+  };
+
+  const stopBackgroundMusic = async () => {
+    try {
+      if (musicStateRef.current) {
+        await musicStateRef.current.stopAsync();
+        await musicStateRef.current.unloadAsync();
+        musicStateRef.current = null; // Clear the reference
+      }
+    } catch (error) {
+      console.error('Failed to stop background music', error);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (music) {
+        playBackgroundMusic();
+      } else {
+        stopBackgroundMusic();
+      }
+
+      return () => {
+        stopBackgroundMusic();
+      };
+    }, [music])
+  );
+
+  async function playTransitionSound() {
+    if( sound === true ) {
+      const { sound } = await Audio.Sound.createAsync( require('../../assets/sfx/woosh.mp3')
+      );
+      setSound(sound);
+
+      await sound.playAsync();
+    }
+
   }
+
+  useEffect(() => {
+    return soundState
+      ? () => {
+          soundState.unloadAsync();
+        }
+      : undefined;
+  }, [soundState]);
+
+  const toggleSwitchSound = () => {
+    dispatch(changeSound({ newSound: !sound }));
+  };
+
+  const toggleSwitchMusic = () => {
+    dispatch(changeMusic({ newMusic: !music }));
+  };
   
   const saveSettings = () => {
-    dispatch(changeLanguage({ newLanguage: value }));
+    dispatch(changeLanguage({ newLanguage: languageValue }));
+    dispatch(changeDifficulty({ newDifficulty: difficultyValue }));
     setIsModalVisible(false);
-  }
+  };
+
+  const t = translations[language as Language];
   
   const languages = [
     { label: 'Bosanski', value: 'bh' },
     { label: 'English', value: 'en' },
   ];
-
-  const t = translations[language as Language];
+  
+  const difficulties = [
+    { label: t.easy, value: 'easy' },
+    { label: t.medium, value: 'medium' },
+    { label: t.hard, value: 'hard' },
+  ];
 
   return (
     <ImageBackground source={require('../../assets/backgrounds/bg1.jpg')} style={styles.backgroundImage}>
@@ -42,29 +126,29 @@ export default function MainScreen({ navigation }: MainScreenProps) {
       </Pressable>
       <View style={styles.gameChooseTable}>
         <View style={styles.tableRow}>
-          <Pressable onPress={() => navigation.navigate("GameScreen", { game: 'counting' })}>
+          <Pressable onPress={() => { navigation.navigate("GameScreen", { game: 'counting' }); playTransitionSound();}}>
             <Gameicon title={t.counting}></Gameicon>
           </Pressable>
-          <Pressable onPress={() => navigation.navigate("GameScreen", { game: 'compare' })}>
+          <Pressable onPress={() => { navigation.navigate("GameScreen", { game: 'compare' }); playTransitionSound(); }}>
             <Gameicon title={t.compare}></Gameicon>
           </Pressable>
         </View>
         <View style={styles.tableRow}>
-        <Pressable onPress={() => navigation.navigate("GameScreen", { game: 'adding' })}>
+        <Pressable onPress={() => { navigation.navigate("GameScreen", { game: 'adding' }); playTransitionSound(); }}>
             <Gameicon title={t.adding}></Gameicon>
           </Pressable>
-          <Pressable onPress={() => navigation.navigate("GameScreen", { game: 'subtracting' })}>
+          <Pressable onPress={() => { navigation.navigate("GameScreen", { game: 'subtracting' }); playTransitionSound(); }}>
             <Gameicon title={t.subtracting}></Gameicon>
           </Pressable>
-          <Pressable onPress={() => navigation.navigate("GameScreen", { game: 'multiply' })}>
+          <Pressable onPress={() => { navigation.navigate("GameScreen", { game: 'multiply' }); playTransitionSound(); }}>
             <Gameicon title={t.multiply}></Gameicon>
           </Pressable>
         </View>
         <View style={styles.tableRow}>
-        <Pressable onPress={() => navigation.navigate("GameScreen", { game: 'divide' })}>
+        <Pressable onPress={() => { navigation.navigate("GameScreen", { game: 'divide' }); playTransitionSound(); }}>
             <Gameicon title={t.divide}></Gameicon>
           </Pressable>
-          <Pressable onPress={() => navigation.navigate("GameScreen", { game: 'quiz' })}>
+          <Pressable onPress={() => { navigation.navigate("GameScreen", { game: 'quiz' }); playTransitionSound(); }}>
             <Gameicon title={t.quiz}></Gameicon>
           </Pressable>
         </View>
@@ -72,7 +156,9 @@ export default function MainScreen({ navigation }: MainScreenProps) {
       <Modal transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modal}>
-            <Text style={styles.settingsLabel}>{t.settings}</Text>
+            <View style={styles.flexCenter}>
+              <Text style={styles.settingsLabel}>{t.settings}</Text>
+            </View>
             <View style={styles.settingRow}>
               <Text style={styles.settingName}>{t.language}</Text>
               <Dropdown
@@ -83,25 +169,51 @@ export default function MainScreen({ navigation }: MainScreenProps) {
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
-                placeholder={value}
-                value={value}
+                placeholder={languageValue}
+                value={languageValue}
                 onChange={item => {
-                  setValue(item.value);
+                  setLanguage(item.value);
                 }}
               />
             </View>
 
             <View style={styles.settingRow}>
+              <Text style={styles.settingName}>{t.difficulty}</Text>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                data={difficulties}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={difficultyValue}
+                value={difficultyValue}
+                onChange={item => {
+                  setDifficulty(item.value);
+                }}
+              />
+            </View>
+
+            <View style={styles.settingRow}>
+              <Text style={[styles.settingName]}>{t.music}</Text>
+              <Switch style={styles.switch}
+              onValueChange={toggleSwitchMusic}
+              value={music}
+              ></Switch>
+
               <Text style={styles.settingName}>{t.sound}</Text>
               <Switch style={styles.switch}
-              onValueChange={toggleSwitch}
+              onValueChange={toggleSwitchSound}
               value={sound}
               ></Switch>
             </View>
 
-            <Pressable style={styles.saveButton} onPress={saveSettings}>
-              <Text>{t.save}</Text>
-            </Pressable>
+            <View style={styles.flexCenter}>
+              <Pressable style={styles.saveButton} onPress={saveSettings}>
+                <Text>{t.save}</Text>
+              </Pressable>
+            </View>
 
           </View>
 
@@ -167,7 +279,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 13,
     borderColor: '#f18a3d',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+  },
+  flexCenter: {
+    width: '100%',
+    alignItems: 'center'
   },
   settingsLabel: {
     fontSize: 30,
@@ -176,11 +292,14 @@ const styles = StyleSheet.create({
   },
   settingRow: {
     flexDirection: 'row',
-    marginTop: 30,
+    marginTop: 20,
+    marginLeft: 50,
+    width: '100%',
   },
   settingName: {
     color: 'white',
     fontSize: 20,
+    width: 100,
   },
   dropdown: {
     height: 40,
@@ -228,11 +347,11 @@ const styles = StyleSheet.create({
   },
   switch: {
     marginTop: -7,
-    marginRight: 130,
-    marginLeft: 50,
+    marginRight: 20,
+    marginLeft: 20,
   },
   saveButton: {
-    marginTop: 40,
+    marginTop: 15,
     width: 150,
     height: 30,
     alignItems: 'center',

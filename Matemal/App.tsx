@@ -1,11 +1,24 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import React, { useEffect } from 'react';
-import MainScreen from './screens/mainScreen';
-import GameScreen from './screens/gameScreen';
+import React, { useEffect, useState } from 'react';
+import MainScreen from './src/screens/mainScreen';
+import GameScreen from './src/screens/gameScreen';
+import { Provider } from 'react-redux';
+import store from './src/redux/store';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Audio } from 'expo-av';
+
+export type StackParams = {
+  MainScreen: undefined;
+  GameScreen: { game: string };
+};
+
+const Stack = createNativeStackNavigator<StackParams>();
 
 export default function App() {
+
   useEffect(() => {
     async function lockOrientation() {
       await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
@@ -14,10 +27,15 @@ export default function App() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <MainScreen></MainScreen>
+    <NavigationContainer>
       <StatusBar hidden />
-    </View>
+      <Provider store={ store }>
+        <Stack.Navigator screenOptions={{headerShown: false}}>
+            <Stack.Screen name="MainScreen" component={MainScreen}/>
+            <Stack.Screen name="GameScreen" component={GameScreen}/>
+        </Stack.Navigator>
+      </Provider>
+    </NavigationContainer>
   );
 }
 

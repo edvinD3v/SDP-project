@@ -19,10 +19,10 @@ export default function QuizGame({ x, y, operator }: Props) {
     
   return (
     <View style={styles.container}>
-      <Symbol symbol={x} size={90} color='white'></Symbol>
-      <Symbol symbol={operator} size={90} color='white'></Symbol>
-      <Symbol symbol={y} size={90} color='white'></Symbol>
-      <Symbol symbol={'='} size={90} color='white'></Symbol>
+      <Symbol symbol={x} size={70} color='white'></Symbol>
+      <Symbol symbol={operator} size={70} color='white'></Symbol>
+      <Symbol symbol={y} size={70} color='white'></Symbol>
+      <Symbol symbol={'='} size={70} color='white'></Symbol>
 
       <View style={styles.qbox}>
           <QBox size = {50}></QBox>

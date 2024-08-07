@@ -10,31 +10,6 @@ interface Props {
 }
 
 export default function MultiplyGame({ x, y }: Props) {
-
-  const [numColumns, setColumnNo] = useState(1);
-  const randomIcon = useRandomIcon(x, y);
-    
-  useEffect(() => {
-    if (x >= y) {
-      setColumnNo(x);
-    } else {
-      setColumnNo(y);
-    }
-  }, [x, y]);
-
-  function createArray(number: any) {
-    let newArr = [];  
-    for (let i = 1; i <= number; i++) {
-        newArr.push(i);
-    }
-    return newArr;
-  }
-
-  let data = createArray(x*y);
-    	
-  const renderItem = ({item}: {item: any}) => {
-    return <Image style={[styles.images]} source={randomIcon}/>
-  }
     
   return (
     <View style={styles.container}>
@@ -49,18 +24,6 @@ export default function MultiplyGame({ x, y }: Props) {
         </View>
       </View>
       
-      <View style={styles.itemBox}>
-        <View style={styles.box}>
-          <FlatList
-              data={data}
-              renderItem={renderItem}
-              numColumns={numColumns}
-              key={numColumns}>
-          </FlatList>
-
-        </View>
-
-      </View>
     </View>
   );
 }
@@ -72,6 +35,7 @@ const styles = StyleSheet.create({
     width: width * 0.515,
     height: height * 0.87,
     flexDirection: 'column',
+    justifyContent: 'center'
   },
   task: {
     flexDirection: 'row',

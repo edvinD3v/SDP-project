@@ -48,7 +48,7 @@ export default function SubtractingGame({ x, y }: Props) {
   function createArray(number: any) {
     let newArr = [];
     for (let i = 1; i <= number; i++) {
-        newArr.push(i);
+        newArr. push(i);
     }
     return newArr;
   }
@@ -69,8 +69,6 @@ export default function SubtractingGame({ x, y }: Props) {
     return <Image style={[styles.images, itemStyle]} source={randomIcon}/>
   }
   
-    
-    
   return (
     <View style={styles.container}>
       <View style={styles.task}>

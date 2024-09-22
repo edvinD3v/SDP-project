@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, FlatList, View, Image } from 'react-native';
+import { Dimensions, StyleSheet, FlatList, View, Image, Pressable } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Symbol from '../gameComponents/symbol';
 import QBox from '../gameComponents/qBox';
@@ -10,16 +10,21 @@ interface Props {
 }
 
 export default function SubtractingGame({ x, y }: Props) {
-
   const [numColumnsX, setColumnNoX] = useState(1);
+  const [isQBoxPressed, setIsQBoxPressed] = useState(false);
   const randomIcon = useRandomIcon(x, y);
 
   useEffect(() => {
+    setIsQBoxPressed(false);
+    updateNumColumns(x);
+  }, [x, y]);
+
+  const updateNumColumns = (x: number) => {
     if (x >= 1 && x <= 2) {
       setColumnNoX(2);
     } else if (x === 3) {
       setColumnNoX(3);
-    } else if (x >=4 && x<=8) {
+    } else if (x >= 4 && x <= 8) {
       setColumnNoX(4);
     } else if (x >= 9 && x <= 10) {
       setColumnNoX(5);
@@ -32,12 +37,11 @@ export default function SubtractingGame({ x, y }: Props) {
     } else {
       setColumnNoX(9);
     }
-  }, [x]);
+  };
 
   const formatData = (data: any, numColumns: any) => {
     const numberOfFullRows = Math.floor(data.length / numColumns);
-  
-    let numberOfElementsLastRow = data.length - (numberOfFullRows * numColumns);
+    let numberOfElementsLastRow = data.length - numberOfFullRows * numColumns;
     while (numberOfElementsLastRow !== numColumns && numberOfElementsLastRow !== 0) {
       data.push({ key: `blank-${numberOfElementsLastRow}`, empty: true });
       numberOfElementsLastRow++;
@@ -45,55 +49,52 @@ export default function SubtractingGame({ x, y }: Props) {
     return data;
   };
 
-  function createArray(number: any) {
+  const createArray = (number: any) => {
     let newArr = [];
     for (let i = 1; i <= number; i++) {
-        newArr.push(i);
+      newArr.push(i);
     }
     return newArr;
-  }
-  let dataX = createArray(x);
-    	
-  const renderItem = ({item, index}: {item: any, index: number}) => {
-    // Calculate the number of visible items based on dataX length
+  };
+
+  const dataX = createArray(x);
+
+  const handleQBoxPress = () => {
+    setIsQBoxPressed(true);
+  };
+
+  const renderItem = ({ item, index }: { item: any; index: number }) => {
     const numberOfVisibleItems = dataX.length - Math.ceil(dataX.length / numColumnsX) * numColumnsX + x;
-    // Calculate the start index for the elements that should have 50% opacity
     const opacityStartIndex = numberOfVisibleItems - y;
-  
-    // Check if the current index is within the visible range and apply opacity accordingly
-    const itemStyle = index >= opacityStartIndex ? { opacity: 0.45 } : { opacity: 1 };
-  
+
+    const itemStyle = isQBoxPressed && index >= opacityStartIndex ? { opacity: 0 } : { opacity: 1 };
+
     if (item.empty === true) {
       return <View style={[styles.images, styles.itemInvisible]} />;
     }
-    return <Image style={[styles.images, itemStyle]} source={randomIcon}/>
-  }
-  
-    
-    
+    return <Image style={[styles.images, itemStyle]} source={randomIcon} />;
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.task}>
-        <Symbol symbol={x} size={70} color='white'></Symbol>
-        <Symbol symbol='-' size={70} color='white'></Symbol>
-        <Symbol symbol={y} size={70} color='white'></Symbol>
-        <Symbol symbol='=' size={70} color='white'></Symbol>
+        <Symbol symbol={x} size={70} color="white" />
+        <Symbol symbol="-" size={70} color="white" />
+        <Symbol symbol={y} size={70} color="white" />
+        <Symbol symbol="=" size={70} color="white" />
 
-        <View style={styles.qbox}>
-        <QBox size = {50}></QBox>
-        </View>
+        <Pressable
+          style={[styles.qbox, isQBoxPressed ? styles.qboxPressed : styles.qboxNotPressed]}
+          onPress={handleQBoxPress}
+        >
+          <QBox size={50} />
+        </Pressable>
       </View>
-      
+
       <View style={styles.itemBox}>
         <View style={styles.box}>
-          <FlatList
-              data={formatData(dataX, numColumnsX)}
-              renderItem={renderItem}
-              numColumns={numColumnsX}
-              key={numColumnsX}>
-          </FlatList>
+          <FlatList data={formatData(dataX, numColumnsX)} renderItem={renderItem} numColumns={numColumnsX} key={numColumnsX} />
         </View>
-
       </View>
     </View>
   );
@@ -111,15 +112,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 10,
     marginLeft: 10,
-    justifyContent: 'space-around'
+    justifyContent: 'space-around',
   },
   qbox: {
     height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  qboxNotPressed: {
+    borderWidth: 3,
+    borderColor: 'yellow',
+  },
+  qboxPressed: {
+    borderWidth: 3,
+    borderColor: 'black',
   },
   itemBox: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   box: {
     height: '95%',
@@ -134,6 +145,6 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   itemInvisible: {
-    backgroundColor: 'transparent' 
+    backgroundColor: 'transparent',
   },
 });

@@ -11,27 +11,6 @@ interface Props {
 
 export default function DivideGame({ x, y }: Props) {
 
-  const [numColumns, setColumnNo] = useState(x);
-  const randomIcon = useRandomIcon(x, y);
-
-  useEffect(() => {
-    setColumnNo(x/y);
-  }, [x, y]);
-
-  function createArray(number: any) {
-    let newArr = [];
-    for (let i = 1; i <= number; i++) {
-        newArr.push(i);
-    }
-    return newArr;
-  }
-
-  let data = createArray(x);
-    	
-  const renderItem = ({item}: {item: any}) => {
-    return <Image style={[styles.images]} source={randomIcon}/>
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.task}>
@@ -44,18 +23,7 @@ export default function DivideGame({ x, y }: Props) {
         <QBox size = {50}></QBox>
         </View>
       </View>
-      
-      <View style={styles.itemBox}>
-        <View style={styles.box}>
-          <FlatList
-              data={data}
-              renderItem={renderItem}
-              numColumns={numColumns}
-              key={numColumns}>
-          </FlatList>
-        </View>
-
-      </View>
+  
     </View>
   );
 }
@@ -67,6 +35,7 @@ const styles = StyleSheet.create({
     width: width * 0.515,
     height: height * 0.87,
     flexDirection: 'column',
+    justifyContent: 'center'
   },
   task: {
     flexDirection: 'row',
